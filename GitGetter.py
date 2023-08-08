@@ -1,20 +1,22 @@
 import platform
+#import distro
 import subprocess
 import argparse
 import os
+
 def install_git(url, destination):
     system = platform.system()
 
     if system == "Linux":
-        distro = platform.linux_distribution(full_distribution_name=False)[0].lower()
-
-        if distro in ["debian", "ubuntu"]:
+        if os.path.exists("/usr/bin/apt"):
             package_manager = "apt"
-        else:
+        elif os.path.exists("/usr/bin/yum"):
             package_manager = "yum"
+        else:
+            print("Unsupported Linux distribution. Please install Git manually.")
+            return
 
         subprocess.run([package_manager, "install", "-y", "git"])
-
     elif system == "Darwin":
         try:
             subprocess.run(["brew", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -36,18 +38,12 @@ def install_git(url, destination):
     else:
         print(f"Unsupported operating system: {system}")
 
-   #  env = None
- #   if system == "Windows":
-   #     env = {"PATH": f"{os.environ['PATH']};C:\\Program Files\\Git\\bin"}
-
     result = subprocess.run(['git', 'clone', url, destination], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     print(result)
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Clone a Git repository.")
-    parser.add_argument("-u","--url", help="URL of the Git repository to clone", type=str, required=True, action="store")
-    parser.add_argument("-d","--destination", help="Destination directory for the clone",type=str, required=True, action="store")
+    parser.add_argument("-u", "--url", help="URL of the Git repository to clone", type=str, required=True, action="store")
+    parser.add_argument("-d", "--destination", help="Destination directory for the clone", type=str, required=True, action="store")
     args = parser.parse_args()
-    #RHOST= getattr(args, 'RHOST')#"192.168.2.253"
-    #RPORT= getattr(args, 'RPORT')#7443
     install_git(args.url, args.destination)
